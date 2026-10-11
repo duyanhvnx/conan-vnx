@@ -1,0 +1,1203 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CONAN VNX - Sàn Tool & Panel Free Fire</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;600;700&family=Saira+Condensed:wght@600;800&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+<style>
+  :root{--bg:#050a0e;--panel:#0a1419;--line:#12303a;--accent:#00d4ff;--green:#00ff9d;--text:#d9f7ff;--mute:#6d8f9c;--gold:#ffcc33;--red:#ff4d6d;}
+  html{scroll-behavior:smooth}
+  body{background:var(--bg);color:var(--text);font-family:'Chakra Petch',sans-serif;
+    background-image:radial-gradient(900px 500px at 85% -10%,rgba(0,255,157,.15),transparent),radial-gradient(700px 500px at -10% 30%,rgba(0,212,255,.14),transparent);}
+  .display{font-family:'Saira Condensed',sans-serif;letter-spacing:.02em}
+  .neon{color:#fff;text-shadow:0 0 6px var(--accent),0 0 18px var(--accent),0 0 38px var(--green);animation:flick 5s infinite}
+  @keyframes flick{0%,92%,100%{opacity:1}93%{opacity:.55}94%{opacity:1}96%{opacity:.7}97%{opacity:1}}
+  .panel{background:var(--panel);border:1px solid var(--line)}
+  .btn{background:linear-gradient(90deg,var(--accent),var(--green));color:#001a1f;font-weight:700;clip-path:polygon(8px 0,100% 0,calc(100% - 8px) 100%,0 100%);transition:filter .15s,transform .15s}
+  .btn:hover{filter:brightness(1.15)}.btn:active{transform:scale(.97)}.btn:disabled{filter:grayscale(1);opacity:.5;cursor:not-allowed}
+  .btn-ghost{border:1px solid var(--line);color:var(--text);transition:border-color .15s}
+  .btn-ghost:hover{border-color:var(--accent)}
+  .inp{width:100%;background:#040d12;border:1px solid var(--line);padding:.55rem .75rem;color:var(--text);outline:none}
+  .inp:focus{border-color:var(--green);box-shadow:0 0 0 2px rgba(0,255,157,.25)}
+  .card{position:relative;transition:border-color .2s,transform .2s;cursor:pointer}
+  .card:hover{border-color:var(--accent);transform:translateY(-3px)}
+  .card::before{content:"";position:absolute;inset:0 0 auto 0;height:2px;background:linear-gradient(90deg,var(--accent),var(--green))}
+  .tag-ok{color:#00ff9d;border-color:#00ff9d55}.tag-bad{color:#ffcc33;border-color:#ffcc3355}.tag-no{color:#ff4d6d;border-color:#ff4d6d55}
+  .modal-bg{position:fixed;inset:0;background:rgba(1,7,10,.85);backdrop-filter:blur(5px);z-index:60;display:none;align-items:center;justify-content:center;padding:1rem}
+  .modal-bg.open{display:flex}
+  .scan{background:repeating-linear-gradient(0deg,rgba(0,255,157,.03) 0 1px,transparent 1px 3px)}
+  .caret::after{content:"▍";animation:blink 1s steps(2) infinite;color:var(--accent)}@keyframes blink{50%{opacity:0}}
+  a:focus-visible,button:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  table td,table th{padding:.5rem .6rem;text-align:left;border-bottom:1px solid var(--line);font-size:.85rem;vertical-align:top}
+  .lbl{display:block;font-size:.72rem;color:var(--mute);margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.05em}
+  .nav-tab{padding:.75rem 1.25rem;font-weight:700;border-bottom:2px solid transparent;cursor:pointer;transition:.15s;color:var(--mute)}
+  .nav-tab:hover{color:var(--text)}
+  .nav-tab.active{color:var(--text);border-color:var(--accent);text-shadow:0 0 8px var(--accent)}
+  .tab-content{display:none}.tab-content.active{display:block}
+  .chip{display:inline-block;padding:.15rem .55rem;font-size:.7rem;border-radius:99px;background:#0a2028;border:1px solid var(--line)}
+  .chip-green{background:#052a1e;border-color:#00ff9d55;color:var(--green)}
+  .chip-red{background:#2a0812;border-color:#ff4d6d55;color:var(--red)}
+  .chip-gold{background:#2a2208;border-color:#ffcc3355;color:var(--gold)}
+  .chip-purple{background:#1f0a2a;border-color:#c266ff55;color:#c266ff}
+  .card-select{padding:.9rem;border:2px solid var(--line);background:#040d12;cursor:pointer;text-align:center;font-weight:700;transition:.15s}
+  .card-select:hover{border-color:var(--accent)}
+  .card-select.selected{border-color:var(--green);background:#052019}
+  .avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--green));display:flex;align-items:center;justify-content:center;font-weight:800;color:#001a1f;cursor:pointer;border:2px solid var(--line);transition:.15s}
+  .avatar:hover{border-color:var(--accent);transform:scale(1.05)}
+  .badge-dot{position:absolute;top:-4px;right:-4px;background:var(--red);color:#fff;font-size:.65rem;font-weight:800;min-width:18px;height:18px;border-radius:99px;display:flex;align-items:center;justify-content:center;padding:0 4px;border:2px solid var(--bg)}
+  .noti-item{padding:.75rem;border-bottom:1px solid var(--line);cursor:pointer;transition:.15s}
+  .noti-item:hover{background:#0a2028}
+  .noti-item.unread{background:#051a24;border-left:3px solid var(--accent)}
+  .sidebar-item{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;cursor:pointer;transition:.15s;border-left:3px solid transparent;font-weight:600}
+  .sidebar-item:hover{background:#0a2028;border-color:var(--accent)}
+  .sidebar-item.active{background:#0a2028;border-color:var(--green);color:var(--green)}
+  .sidebar-title{font-size:.7rem;color:var(--mute);text-transform:uppercase;letter-spacing:.08em;padding:.75rem 1rem .25rem;font-weight:700}
+  .footer-col h4{font-size:.95rem;font-weight:800;margin-bottom:.75rem;color:var(--text);text-transform:uppercase;letter-spacing:.05em}
+  .footer-col a{display:block;font-size:.85rem;color:var(--mute);padding:.25rem 0;transition:.15s}
+  .footer-col a:hover{color:var(--accent);padding-left:.25rem}
+  .partner-tag{display:inline-block;padding:.2rem .5rem;font-size:.7rem;background:#0a2028;border:1px solid var(--accent);color:var(--accent);border-radius:99px}
+  .clone-tag{display:inline-block;padding:.2rem .5rem;font-size:.7rem;background:#1f0a2a;border:1px solid #c266ff;color:#c266ff;border-radius:99px}
+  #toast{position:fixed;top:80px;left:50%;transform:translateX(-50%) translateY(-20px);z-index:100;opacity:0;pointer-events:none;transition:all .35s cubic-bezier(.68,-.55,.27,1.55)}
+  #toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast-box{display:flex;align-items:center;gap:.75rem;padding:.9rem 1.25rem;min-width:280px;max-width:90vw;background:linear-gradient(135deg,#0a1419,#0a2028);border:1px solid var(--accent);border-radius:8px;box-shadow:0 10px 40px rgba(0,212,255,.4)}
+  .toast-icon{font-size:1.6rem;flex-shrink:0}
+  .toast-content{flex:1}
+  .toast-title{font-weight:800;font-size:.9rem;color:var(--accent);margin-bottom:.1rem}
+  .toast-msg{font-size:.85rem;color:var(--text)}
+  .toast-box.success{border-color:var(--green);box-shadow:0 10px 40px rgba(0,255,157,.4)}
+  .toast-box.success .toast-title{color:var(--green)}
+  .toast-box.error{border-color:var(--red);box-shadow:0 10px 40px rgba(255,77,109,.4)}
+  .toast-box.error .toast-title{color:var(--red)}
+  .toast-box.warning{border-color:var(--gold);box-shadow:0 10px 40px rgba(255,204,51,.4)}
+  .toast-box.warning .toast-title{color:var(--gold)}
+  .history-item{padding:.75rem;border:1px solid var(--line);background:#040d12;border-radius:6px;transition:.15s}
+  .history-item:hover{border-color:var(--accent);background:#0a1419}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="sticky top-0 z-40 border-b" style="background:rgba(5,10,14,.92);backdrop-filter:blur(10px);border-color:var(--line)">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+    <a href="#" onclick="switchTab('shop');return false" class="display neon text-3xl font-extrabold">CONAN VNX</a>
+    <div class="flex flex-wrap items-center gap-2 text-sm">
+      <div id="userBox" class="hidden flex-wrap items-center gap-2">
+        <div class="relative">
+          <button class="btn-ghost px-3 py-1.5 relative" onclick="toggleNotifications()" style="font-size:1.1rem">🔔
+            <span id="notiBadge" class="badge-dot hidden">0</span>
+          </button>
+          <div id="notiDropdown" class="hidden absolute right-0 mt-2 w-80 max-h-96 overflow-auto panel" style="box-shadow:0 10px 40px rgba(0,0,0,.7)">
+            <div class="flex justify-between items-center p-3 border-b" style="border-color:var(--line)">
+              <b class="display text-lg">Thông báo</b>
+              <button class="text-xs underline" onclick="markAllRead()">Đánh dấu đã đọc</button>
+            </div>
+            <div id="notiList"></div>
+          </div>
+        </div>
+        <div class="relative">
+          <button class="btn-ghost px-3 py-1.5 relative" onclick="openCart()" style="font-size:1.1rem">🛒
+            <span id="cartBadge" class="badge-dot hidden">0</span>
+          </button>
+        </div>
+        <div class="avatar" id="uAvatar" onclick="openProfile()" title="Hồ sơ">?</div>
+        <span class="panel px-3 py-1.5 cursor-pointer hover:opacity-80" onclick="openProfile()">👤 <b id="uName"></b> <span id="uRole" class="text-xs" style="color:var(--green)"></span> · <b id="uBal" style="color:var(--accent)">0</b>đ</span>
+        <button id="adminBtn" class="btn px-4 py-1.5 hidden" onclick="openAdmin()">Admin</button>
+        <button class="btn-ghost px-3 py-1.5" onclick="logout()">Thoát</button>
+      </div>
+      <div id="guestBox" class="flex gap-2">
+        <button class="btn-ghost px-3 py-1.5" onclick="openAuth('login')">Đăng nhập</button>
+        <button class="btn px-5 py-1.5" onclick="openAuth('register')">Đăng ký</button>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-4">
+  <section class="py-8 grid md:grid-cols-5 gap-6 items-center">
+    <div class="md:col-span-3">
+      <p class="mb-2 text-sm" style="color:var(--mute)">Sàn giao dịch Tool & Panel Free Fire · Uy tín · Tự động 24/7</p>
+      <h1 class="display text-5xl md:text-7xl font-extrabold leading-[.95]">Mua bán tool<br>tại <span class="neon">CONAN VNX</span></h1>
+      <p class="mt-4 max-w-lg text-sm" style="color:var(--mute)">Nạp thẻ tự động, mua key tức thì. Muốn bán sản phẩm? Liên hệ Admin qua Zalo.</p>
+      <div class="mt-5 flex flex-wrap gap-3">
+        <button onclick="switchTab('shop')" class="btn px-6 py-3">🛒 Xem sản phẩm</button>
+        <button onclick="switchTab('deposit')" class="btn-ghost px-6 py-3">💳 Nạp tiền</button>
+        <a href="https://zalo.me/0971139244" target="_blank" class="btn-ghost px-6 py-3">💬 Zalo: 0971139244</a>
+      </div>
+    </div>
+    <div class="md:col-span-2 panel scan p-5 text-sm leading-7">
+      <div style="color:var(--mute)">conan-vnx@panel:~$ status</div>
+      <div>server ........ <span class="tag-ok">ONLINE</span></div>
+      <div>giao key ...... <span class="tag-ok">TỰ ĐỘNG</span></div>
+      <div>sản phẩm ...... <b id="statProducts">0</b> tool</div>
+      <div>key còn lại ... <b id="statKeys">0</b></div>
+      <div class="caret">sẵn sàng nhận đơn</div>
+    </div>
+  </section>
+
+  <nav class="border-b mb-6" style="border-color:var(--line)">
+    <div class="flex flex-wrap overflow-x-auto">
+      <div class="nav-tab active" data-tab="shop" onclick="switchTab('shop')">🛒 Sản phẩm</div>
+      <div class="nav-tab" data-tab="deposit" onclick="switchTab('deposit')">💳 Nạp tiền</div>
+      <div class="nav-tab" data-tab="seller" onclick="switchTab('seller')">🏪 Kênh người bán</div>
+      <div class="nav-tab" data-tab="contact" onclick="switchTab('contact')">💬 Liên hệ</div>
+    </div>
+  </nav>
+
+  <div class="grid lg:grid-cols-[260px_1fr] gap-6">
+    <aside class="hidden lg:block">
+      <div class="sticky top-24 space-y-4">
+        <div class="panel">
+          <div class="sidebar-title">📌 Danh mục chính</div>
+          <div class="sidebar-item active" data-tab="shop" onclick="switchTab('shop')">🛒 Tất cả sản phẩm</div>
+          <div class="sidebar-item" data-tab="deposit" onclick="switchTab('deposit')">💳 Nạp tiền</div>
+          <div class="sidebar-item" data-tab="seller" onclick="switchTab('seller')">🏪 Kênh người bán</div>
+          <div class="sidebar-item" data-tab="contact" onclick="switchTab('contact')">💬 Liên hệ Admin</div>
+        </div>
+        <div class="panel">
+          <div class="sidebar-title">🎧 Hỗ trợ</div>
+          <a href="https://zalo.me/0971139244" target="_blank" class="sidebar-item">💬 Zalo: 0971139244</a>
+          <a href="https://www.tiktok.com/@ahduy.93210" target="_blank" class="sidebar-item">🎵 TikTok: ahduy.93210</a>
+          <div class="sidebar-item" onclick="openProfile();switchProfileTab('deposits')">📜 Lịch sử nạp</div>
+          <div class="sidebar-item" onclick="openProfile();switchProfileTab('orders')">📦 Lịch sử mua</div>
+        </div>
+        <div class="panel">
+          <div class="sidebar-title">🤝 Hợp tác</div>
+          <div class="sidebar-item" onclick="switchTab('seller')">🏪 Đăng bán sản phẩm</div>
+          <div class="sidebar-item" onclick="switchTab('seller')">📢 Quảng cáo / Banner</div>
+          <a href="https://zalo.me/0971139244" target="_blank" class="sidebar-item">💼 Trở thành CTV</a>
+        </div>
+        <div class="panel p-4 text-center" style="background:linear-gradient(135deg,#0a1419,#0a2028);border-color:var(--accent)">
+          <div class="display text-lg font-extrabold" style="color:var(--green)">🎁 ƯU ĐÃI HÔM NAY</div>
+          <div class="text-xs mt-1" style="color:var(--mute)">Nạp 100K tặng 5%</div>
+          <button class="btn w-full py-2 mt-3 text-xs" onclick="switchTab('deposit')">Nạp ngay</button>
+        </div>
+      </div>
+    </aside>
+
+    <div>
+      <section id="tab-shop" class="tab-content active pb-16">
+        <div class="flex flex-wrap gap-2 mb-5 items-center">
+          <input id="searchBox" class="inp" style="max-width:300px" placeholder="🔍 Tìm tool..." oninput="renderProducts()">
+          <select id="filterType" class="inp" style="max-width:200px" onchange="renderProducts()">
+            <option value="">Tất cả loại</option>
+            <option>Tool PC</option>
+            <option>Panel iOS</option>
+            <option>Panel Android</option>
+            <option>Acc Clone FF LV5</option>
+          </select>
+          <select id="filterSort" class="inp" style="max-width:180px" onchange="renderProducts()">
+            <option value="new">Mới nhất</option><option value="priceUp">Giá tăng dần</option><option value="priceDown">Giá giảm dần</option>
+          </select>
+        </div>
+        <div id="productGrid" class="grid sm:grid-cols-2 xl:grid-cols-3 gap-5"><div style="color:var(--mute)">Đang tải...</div></div>
+      </section>
+
+      <section id="tab-deposit" class="tab-content pb-16">
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="panel p-5">
+            <h3 class="display text-3xl font-extrabold mb-1">💳 Nạp thẻ cào</h3>
+            <p class="text-sm mb-4" style="color:var(--mute)">Tiền vào ví sau khi Admin duyệt (1-5 phút).</p>
+            <span class="lbl">Chọn nhà mạng</span>
+            <div class="grid grid-cols-3 md:grid-cols-5 gap-2 mb-4">
+              <div class="card-select" data-telco="VIETTEL" onclick="pickTelco(this)">Viettel</div>
+              <div class="card-select" data-telco="MOBIFONE" onclick="pickTelco(this)">Mobi</div>
+              <div class="card-select" data-telco="VINAPHONE" onclick="pickTelco(this)">Vina</div>
+              <div class="card-select" data-telco="GARENA" onclick="pickTelco(this)">Garena</div>
+              <div class="card-select" data-telco="ZING" onclick="pickTelco(this)">Zing</div>
+            </div>
+            <span class="lbl">Mệnh giá</span>
+            <div class="grid grid-cols-3 md:grid-cols-6 gap-2 mb-4">
+              <div class="card-select" data-amount="10000" onclick="pickAmount(this)">10K</div>
+              <div class="card-select" data-amount="20000" onclick="pickAmount(this)">20K</div>
+              <div class="card-select" data-amount="50000" onclick="pickAmount(this)">50K</div>
+              <div class="card-select" data-amount="100000" onclick="pickAmount(this)">100K</div>
+              <div class="card-select" data-amount="200000" onclick="pickAmount(this)">200K</div>
+              <div class="card-select" data-amount="500000" onclick="pickAmount(this)">500K</div>
+            </div>
+            <span class="lbl">Mã thẻ (seri)</span>
+            <input id="dSeri" class="inp mb-3" placeholder="Số seri in trên thẻ">
+            <span class="lbl">Mã PIN</span>
+            <input id="dPin" class="inp mb-4" placeholder="Mã PIN cào lớp bạc">
+            <button class="btn w-full py-3" onclick="submitDeposit()">📤 Gửi thẻ — Chờ duyệt</button>
+          </div>
+          <div class="space-y-4">
+            <div class="panel p-5">
+              <h3 class="display text-2xl font-extrabold mb-2">📖 Hướng dẫn</h3>
+              <ol class="text-sm space-y-2 list-decimal list-inside" style="color:var(--mute)">
+                <li>Chọn nhà mạng + mệnh giá</li><li>Nhập seri và mã PIN</li><li>Bấm gửi thẻ → chờ duyệt</li>
+                <li>Xem trạng thái tại <b style="color:var(--accent)">Hồ sơ → Lịch sử nạp</b></li>
+              </ol>
+            </div>
+            <div class="panel p-5 text-center">
+              <h3 class="display text-2xl font-extrabold mb-2">💬 Cần hỗ trợ?</h3>
+              <a href="https://zalo.me/0971139244" target="_blank" class="btn inline-block px-6 py-2.5">Nhắn Zalo: 0971139244</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-seller" class="tab-content pb-16">
+        <div class="panel p-8 mb-6 text-center" style="background:linear-gradient(135deg,#0a1419,#0a2028);border-color:var(--accent)">
+          <div style="font-size:4rem">🏪</div>
+          <h2 class="display text-4xl font-extrabold mb-3 mt-3" style="color:var(--green)">KÊNH NGƯỜI BÁN</h2>
+          <p class="text-base max-w-2xl mx-auto" style="color:var(--mute)">Bạn có tool/panel chất lượng muốn bán? Hợp tác với <b style="color:var(--accent)">CONAN VNX</b> để tiếp cận hàng nghìn khách hàng!</p>
+        </div>
+        <h3 class="display text-3xl font-extrabold mb-4">📋 Quy trình đăng bán</h3>
+        <div class="grid md:grid-cols-4 gap-4 mb-8">
+          <div class="panel p-5 text-center"><div style="font-size:2.5rem">1️⃣</div><b class="display text-xl block mt-2">Liên hệ Admin</b><p class="text-xs mt-2" style="color:var(--mute)">Nhắn Zalo <b style="color:var(--accent)">0971139244</b> hoặc TikTok <b style="color:var(--accent)">ahduy.93210</b></p></div>
+          <div class="panel p-5 text-center"><div style="font-size:2.5rem">2️⃣</div><b class="display text-xl block mt-2">Gửi sản phẩm</b><p class="text-xs mt-2" style="color:var(--mute)">Gửi: tên SP, giá, mô tả, ảnh, danh sách key cho Admin</p></div>
+          <div class="panel p-5 text-center"><div style="font-size:2.5rem">3️⃣</div><b class="display text-xl block mt-2">Admin kiểm duyệt</b><p class="text-xs mt-2" style="color:var(--mute)">Admin kiểm tra chất lượng, giá và key trước khi đăng</p></div>
+          <div class="panel p-5 text-center"><div style="font-size:2.5rem">4️⃣</div><b class="display text-xl block mt-2">Bán & nhận tiền</b><p class="text-xs mt-2" style="color:var(--mute)">SP lên sàn, khách mua → nhận tiền theo thỏa thuận</p></div>
+        </div>
+        <h3 class="display text-3xl font-extrabold mb-4">✨ Quyền lợi người bán</h3>
+        <div class="grid md:grid-cols-3 gap-4 mb-8">
+          <div class="panel p-5"><div style="font-size:2rem">📢</div><b class="display text-xl block mt-2" style="color:var(--green)">Miễn phí quảng cáo</b><p class="text-sm mt-2" style="color:var(--mute)">Sản phẩm của bạn được hiển thị trên trang chủ</p></div>
+          <div class="panel p-5"><div style="font-size:2rem">🤝</div><b class="display text-xl block mt-2" style="color:var(--green)">Hợp tác minh bạch</b><p class="text-sm mt-2" style="color:var(--mute)">Chia sẻ doanh thu rõ ràng, không phí ẩn</p></div>
+          <div class="panel p-5"><div style="font-size:2rem">🛡️</div><b class="display text-xl block mt-2" style="color:var(--green)">Hỗ trợ 24/7</b><p class="text-sm mt-2" style="color:var(--mute)">Đội ngũ Admin hỗ trợ setup gian hàng</p></div>
+        </div>
+        <div class="panel p-8 text-center" style="border-color:var(--green)">
+          <h3 class="display text-3xl font-extrabold mb-2">🚀 Sẵn sàng hợp tác?</h3>
+          <p class="text-sm mb-5" style="color:var(--mute)">Liên hệ ngay để Admin hỗ trợ đăng sản phẩm!</p>
+          <div class="flex flex-wrap justify-center gap-3">
+            <a href="https://zalo.me/0971139244" target="_blank" class="btn px-8 py-3">💬 Zalo: 0971139244</a>
+            <a href="https://www.tiktok.com/@ahduy.93210" target="_blank" class="btn-ghost px-8 py-3">🎵 TikTok: ahduy.93210</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="tab-contact" class="tab-content pb-16">
+        <div class="grid md:grid-cols-2 gap-6">
+          <div class="panel p-6">
+            <h2 class="display text-3xl font-extrabold mb-4">💬 Liên hệ Admin</h2>
+            <div class="space-y-3">
+              <a href="https://zalo.me/0971139244" target="_blank" class="flex items-center gap-3 panel p-4"><span style="font-size:2rem">💬</span><div><b class="display text-xl">Zalo: 0971139244</b><br><span class="text-xs" style="color:var(--mute)">Phản hồi nhanh 24/7</span></div></a>
+              <a href="https://www.tiktok.com/@ahduy.93210" target="_blank" class="flex items-center gap-3 panel p-4"><span style="font-size:2rem">🎵</span><div><b class="display text-xl">TikTok: ahduy.93210</b><br><span class="text-xs" style="color:var(--mute)">Video hướng dẫn & review</span></div></a>
+              <a href="https://www.facebook.com/" target="_blank" class="flex items-center gap-3 panel p-4"><span style="font-size:2rem">📘</span><div><b class="display text-xl">Facebook</b><br><span class="text-xs" style="color:var(--mute)">Fanpage chính thức</span></div></a>
+            </div>
+          </div>
+          <div class="panel p-6">
+            <h2 class="display text-3xl font-extrabold mb-4">📌 Lưu ý</h2>
+            <ul class="text-sm space-y-3" style="color:var(--mute)">
+              <li>✅ <b style="color:var(--text)">Uy tín:</b> Giao dịch tự động</li>
+              <li>✅ <b style="color:var(--text)">Bảo hành:</b> Key lỗi đổi 1-1 trong 24h</li>
+              <li>⚠️ <b style="color:var(--text)">Lưu ý:</b> Không hoàn tiền nếu key đã dùng</li>
+              <li>💬 <b style="color:var(--text)">Khiếu nại:</b> Nhắn Zalo 0971139244</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer class="border-t mt-12" style="border-color:var(--line);background:#040d12">
+  <div class="max-w-7xl mx-auto px-4 py-10">
+    <div class="grid md:grid-cols-5 gap-8 mb-8">
+      <div class="footer-col"><h4>Về CONAN VNX</h4><a href="#">Giới thiệu</a><a href="#" onclick="switchTab('contact');return false">Liên hệ</a><a href="#" onclick="switchTab('seller');return false">Hợp tác</a><a href="#" onclick="switchTab('seller');return false">Tuyển CTV</a></div>
+      <div class="footer-col"><h4>Chính sách</h4><a href="#">Bảo hành</a><a href="#">Đổi trả</a><a href="#">Bảo mật</a><a href="#">Điều khoản</a></div>
+      <div class="footer-col"><h4>Hỗ trợ</h4><a href="#" onclick="switchTab('deposit');return false">Hướng dẫn nạp</a><a href="#" onclick="switchTab('shop');return false">Hướng dẫn mua</a><a href="#" onclick="openProfile();switchProfileTab('orders')">Tra cứu đơn</a></div>
+      <div class="footer-col"><h4>Hợp tác</h4><a href="#" onclick="switchTab('seller');return false">Đăng ký bán</a><a href="https://zalo.me/0971139244" target="_blank">Quảng cáo</a><a href="https://zalo.me/0971139244" target="_blank">Trở thành CTV</a></div>
+      <div class="footer-col"><h4>Kết nối</h4><a href="https://zalo.me/0971139244" target="_blank">💬 Zalo: 0971139244</a><a href="https://www.tiktok.com/@ahduy.93210" target="_blank">🎵 TikTok: ahduy.93210</a><a href="https://www.facebook.com/" target="_blank">📘 Facebook</a></div>
+    </div>
+    <div class="border-t pt-6 text-center text-xs" style="border-color:var(--line);color:var(--mute)">
+      <p>© 2025 <b style="color:var(--accent)">CONAN VNX</b> — Sàn giao dịch Tool & Panel Free Fire uy tín hàng đầu Việt Nam</p>
+      <p class="mt-2">Zalo: <a href="https://zalo.me/0971139244" target="_blank" class="underline">0971139244</a> · TikTok: <a href="https://www.tiktok.com/@ahduy.93210" target="_blank" class="underline">ahduy.93210</a></p>
+    </div>
+  </div>
+</footer>
+
+<!-- MODAL PROFILE -->
+<div id="profileModal" class="modal-bg" onclick="if(event.target===this)closeModal('profileModal')">
+  <div class="panel w-full max-w-3xl max-h-[90vh] overflow-auto p-6">
+    <div class="flex justify-between items-center mb-5"><h3 class="display text-3xl font-extrabold">👤 Hồ sơ cá nhân</h3><button onclick="closeModal('profileModal')" class="text-2xl">✕</button></div>
+    <div class="panel p-4 mb-5"><div class="grid md:grid-cols-2 gap-3 text-sm">
+      <div><span class="lbl">Tên đăng nhập</span><b id="pfUsername">-</b></div>
+      <div><span class="lbl">Nickname</span><b id="pfNick">-</b></div>
+      <div><span class="lbl">Gmail</span><b id="pfEmail">-</b></div>
+      <div><span class="lbl">Số dư</span><b id="pfBalance" style="color:var(--green)">0đ</b></div>
+      <div><span class="lbl">Ngày tạo</span><b id="pfCreated">-</b></div>
+      <div><span class="lbl">Vai trò</span><b id="pfRole">-</b></div>
+    </div></div>
+    <div class="flex flex-wrap gap-2 mb-4 border-b" style="border-color:var(--line)">
+      <div class="nav-tab active" id="pfTab-pass" onclick="switchProfileTab('pass')">🔒 Đổi MK</div>
+      <div class="nav-tab" id="pfTab-deposits" onclick="switchProfileTab('deposits')">📜 Lịch sử nạp</div>
+      <div class="nav-tab" id="pfTab-orders" onclick="switchProfileTab('orders')">📦 Lịch sử mua</div>
+    </div>
+    <div id="pfBody-pass">
+      <span class="lbl">MK hiện tại</span><input id="pfOldPass" type="password" class="inp mb-3">
+      <span class="lbl">MK mới (≥6 ký tự)</span><input id="pfNewPass" type="password" class="inp mb-3">
+      <span class="lbl">Xác nhận MK mới</span><input id="pfNewPass2" type="password" class="inp mb-4">
+      <button class="btn px-6 py-2.5" onclick="changePassword()">💾 Đổi MK</button>
+    </div>
+    <div id="pfBody-deposits" class="hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead><tr><th>Thời gian</th><th>Nhà mạng</th><th>Mệnh giá</th><th>Trạng thái</th></tr></thead>
+          <tbody id="pfDepositList"></tbody>
+        </table>
+      </div>
+    </div>
+    <div id="pfBody-orders" class="hidden">
+      <div class="flex justify-between items-center mb-3">
+        <span class="text-sm" style="color:var(--mute)">Tất cả sản phẩm bạn đã mua</span>
+        <button class="btn px-4 py-1.5 text-sm" onclick="copyAllOrders()">📋 Sao chép tất cả</button>
+      </div>
+      <div id="pfOrderList" class="space-y-2"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CART -->
+<div id="cartModal" class="modal-bg" onclick="if(event.target===this)closeModal('cartModal')">
+  <div class="panel w-full max-w-2xl max-h-[90vh] overflow-auto p-6">
+    <div class="flex justify-between items-center mb-4"><h3 class="display text-3xl font-extrabold">🛒 Giỏ hàng</h3><button onclick="closeModal('cartModal')" class="text-2xl">✕</button></div>
+    <div id="cartList"></div>
+    <div id="cartFooter" class="border-t mt-4 pt-4" style="border-color:var(--line)">
+      <div class="flex justify-between items-center mb-3"><span class="text-lg">Tổng cộng:</span><b class="display text-3xl" id="cartTotal" style="color:var(--accent)">0đ</b></div>
+      <button class="btn w-full py-3" onclick="checkoutCart()">💳 Thanh toán tất cả</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL AUTH -->
+<div id="authModal" class="modal-bg" onclick="if(event.target===this)closeModal('authModal')">
+  <div class="panel w-full max-w-sm p-6">
+    <h3 id="authTitle" class="display text-3xl font-extrabold mb-4">Đăng nhập</h3>
+    <input id="aNick" class="inp mb-3 regOnly" placeholder="Tên hiển thị">
+    <input id="aUser" class="inp mb-3" placeholder="Tên đăng nhập hoặc Gmail">
+    <input id="aEmail" type="email" class="inp mb-3 regOnly" placeholder="Gmail">
+    <input id="aPass" type="password" class="inp mb-4" placeholder="Mật khẩu (≥6 ký tự)" onkeydown="if(event.key==='Enter')submitAuth()">
+    <button class="btn w-full py-2.5" onclick="submitAuth()" id="authBtn">Đăng nhập</button>
+    <p class="mt-3 text-sm text-center" style="color:var(--mute)"><a href="#" id="authSwitch" class="underline" onclick="openAuth(authMode==='login'?'register':'login');return false"></a><span id="forgotLink"> · <a href="#" class="underline" onclick="closeModal('authModal');openModal('forgotModal');return false">Quên MK?</a></span></p>
+  </div>
+</div>
+
+<!-- MODAL FORGOT -->
+<div id="forgotModal" class="modal-bg" onclick="if(event.target===this)closeModal('forgotModal')">
+  <div class="panel w-full max-w-sm p-6">
+    <h3 class="display text-3xl font-extrabold mb-2">Khôi phục TK</h3>
+    <p class="text-sm mb-3" style="color:var(--mute)">Nhập Gmail đã đăng ký.</p>
+    <input id="fEmail" type="email" class="inp mb-3" placeholder="Gmail">
+    <button class="btn w-full py-2.5" onclick="submitForgot()">Gửi yêu cầu</button>
+    <div id="fResult" class="mt-3 text-sm"></div>
+  </div>
+</div>
+
+<!-- MODAL PRODUCT DETAIL -->
+<div id="productModal" class="modal-bg" onclick="if(event.target===this)closeModal('productModal')">
+  <div class="panel w-full max-w-3xl max-h-[90vh] overflow-auto">
+    <div class="grid md:grid-cols-2 gap-0">
+      <img id="pmImg" class="w-full h-64 md:h-full object-cover" style="background:#040d12">
+      <div class="p-6">
+        <div class="flex justify-between items-start mb-2"><h3 id="pmName" class="display text-3xl font-extrabold leading-tight"></h3><button onclick="closeModal('productModal')" class="text-2xl">✕</button></div>
+        <div class="flex flex-wrap gap-2 mb-3"><span id="pmStatus" class="chip"></span><span id="pmType" class="chip"></span><span id="pmStock" class="chip"></span></div>
+        <p id="pmDesc" class="text-sm mb-4" style="color:var(--mute)"></p>
+        <div id="pmPartner" class="text-xs mb-2"></div>
+        <div id="pmInfo" class="text-xs mb-4"></div>
+        <div class="border-t pt-4 mb-4" style="border-color:var(--line)"><span class="display text-4xl font-extrabold" style="color:var(--accent)" id="pmPrice"></span></div>
+        <div class="panel p-3 text-xs mb-4" style="color:var(--mute)">
+          <div>💰 Số dư: <b id="pmBalance" style="color:var(--green)">0đ</b></div>
+          <div>📞 Hỗ trợ: <a href="https://zalo.me/0971139244" target="_blank" class="underline" style="color:var(--accent)">Zalo 0971139244</a></div>
+        </div>
+        <div class="grid grid-cols-2 gap-2">
+          <button id="pmCartBtn" class="btn-ghost py-3" onclick="addToCart()">🛒 Thêm giỏ</button>
+          <button id="pmBuyBtn" class="btn py-3" onclick="confirmBuy()">⚡ Mua ngay</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL KEY -->
+<div id="keyModal" class="modal-bg">
+  <div class="panel w-full max-w-md p-6 text-center" style="box-shadow:0 0 50px rgba(0,255,157,.3)">
+    <h3 class="display text-3xl font-extrabold">🎉 Mua thành công</h3>
+    <p id="keyProd" class="mt-1 mb-4" style="color:var(--mute)"></p>
+    <div id="keyVal" class="panel p-3 break-all select-all font-bold" style="color:var(--green)"></div>
+    <div class="flex gap-2 mt-4"><button class="btn flex-1 py-2.5" onclick="copyKey()">📋 Sao chép</button><button class="btn-ghost flex-1 py-2.5" onclick="closeModal('keyModal')">Đóng</button></div>
+  </div>
+</div>
+
+<!-- MODAL KEY LIST -->
+<div id="keyListModal" class="modal-bg">
+  <div class="panel w-full max-w-2xl p-6 text-center" style="box-shadow:0 0 50px rgba(0,255,157,.3)">
+    <h3 class="display text-3xl font-extrabold">🎉 Thanh toán thành công</h3>
+    <p class="mt-1 mb-4" style="color:var(--mute)">Danh sách key đã mua:</p>
+    <div id="keyListVal" class="panel p-3 text-left text-sm" style="color:var(--green);max-height:400px;overflow:auto"></div>
+    <div class="flex gap-2 mt-4"><button class="btn flex-1 py-2.5" onclick="copyKeyList()">📋 Sao chép tất cả</button><button class="btn-ghost flex-1 py-2.5" onclick="closeModal('keyListModal')">Đóng</button></div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="modal-bg" style="align-items:stretch">
+  <div class="panel w-full max-w-7xl mx-auto overflow-auto p-5">
+    <div class="flex justify-between items-center mb-4"><h3 class="display text-4xl font-extrabold neon">ADMIN · CONAN VNX</h3><button class="btn-ghost px-4 py-1.5" onclick="closeModal('adminPanel')">Đóng</button></div>
+    <div class="flex flex-wrap gap-2 mb-5" id="adminTabs">
+      <button class="btn px-5 py-2" data-tab="aDeposits">💳 Duyệt nạp <span id="depCount"></span></button>
+      <button class="btn-ghost px-5 py-2" data-tab="aProducts">📦 Sản phẩm</button>
+      <button class="btn-ghost px-5 py-2" data-tab="aUsers">👥 Người dùng</button>
+      <button class="btn-ghost px-5 py-2" data-tab="aOrders">📜 Lịch sử bán</button>
+    </div>
+
+    <div id="aDeposits" class="atab">
+      <h4 class="display text-2xl font-extrabold mb-2">💳 Yêu cầu nạp tiền</h4>
+      <div class="overflow-x-auto"><table class="w-full"><thead><tr><th>Thời gian</th><th>User</th><th>Nhà mạng</th><th>Mệnh giá</th><th>Seri</th><th>PIN</th><th>HĐ</th></tr></thead><tbody id="depositList"></tbody></table></div>
+    </div>
+
+    <div id="aProducts" class="atab hidden">
+      <div class="flex flex-wrap gap-2 mb-4 items-center">
+        <input id="adminSearch" class="inp" style="max-width:280px" placeholder="🔍 Tìm sản phẩm..." oninput="renderAdminProducts()">
+        <button class="btn px-5 py-2" onclick="showProductForm(null)">➕ Thêm SP</button>
+        <button class="btn-ghost px-5 py-2" onclick="showKeyForm()">🔑 Nạp key</button>
+      </div>
+      <div class="overflow-x-auto"><table class="w-full"><thead><tr><th>Ảnh</th><th>Tên</th><th>Loại</th><th>Giá</th><th>Trạng thái</th><th>Hợp tác</th><th>Key/Acc</th><th></th></tr></thead><tbody id="adminProducts"></tbody></table></div>
+    </div>
+
+    <div id="productFormBox" class="modal-bg" style="z-index:70">
+      <div class="panel w-full max-w-2xl p-6 max-h-[90vh] overflow-auto">
+        <div class="flex justify-between items-center mb-4"><h4 class="display text-2xl font-extrabold" id="pFormTitle">➕ Thêm SP</h4><button onclick="closeModal('productFormBox')" class="text-2xl">✕</button></div>
+        <input type="hidden" id="pId">
+        <div class="grid md:grid-cols-2 gap-3 mb-3">
+          <div><span class="lbl">Tên tool *</span><input id="pName" class="inp" placeholder="VD: FAKE LAG PC"></div>
+          <div><span class="lbl">Giá (VNĐ) *</span><input id="pPrice" type="number" min="0" class="inp"></div>
+          <div class="md:col-span-2"><span class="lbl">Link ảnh</span><input id="pImg" class="inp" placeholder="https://..."></div>
+          <div><span class="lbl">Loại</span>
+            <select id="pType" class="inp" onchange="updateFormLabels()">
+              <option>Tool PC</option>
+              <option>Panel iOS</option>
+              <option>Panel Android</option>
+              <option>Acc Clone FF LV5</option>
+            </select>
+          </div>
+          <div><span class="lbl">Trạng thái</span><select id="pStatus" class="inp"><option value="undetected">Undetected</option><option value="maintenance">Bảo trì</option></select></div>
+          <div class="md:col-span-2"><span class="lbl">🤝 Hợp tác với</span><input id="pPartner" class="inp" placeholder="VD: Duy Anh, Team XYZ..."></div>
+          <div class="md:col-span-2"><span class="lbl" id="pInfoLabel">📝 Thông tin TK/MK + Key</span>
+            <textarea id="pInfo" rows="4" class="inp" placeholder="VD:&#10;TK: user123&#10;MK: pass456&#10;KEY: ABC-123"></textarea>
+          </div>
+          <div class="md:col-span-2"><span class="lbl">Mô tả</span><textarea id="pDesc" rows="3" class="inp"></textarea></div>
+        </div>
+        <div class="flex gap-2"><button class="btn px-6 py-2" onclick="saveProduct()">💾 Lưu</button><button class="btn-ghost px-6 py-2" onclick="closeModal('productFormBox')">Hủy</button></div>
+      </div>
+    </div>
+
+    <div id="keyFormBox" class="modal-bg" style="z-index:70">
+      <div class="panel w-full max-w-2xl p-6">
+        <div class="flex justify-between items-center mb-4"><h4 class="display text-2xl font-extrabold">🔑 Nạp key</h4><button onclick="closeModal('keyFormBox')" class="text-2xl">✕</button></div>
+        <span class="lbl">Chọn sản phẩm</span><select id="kProd" class="inp mb-3"></select>
+        <span class="lbl">Danh sách key (mỗi dòng 1 key)</span><textarea id="kList" rows="8" class="inp mb-3"></textarea>
+        <div class="flex gap-2"><button class="btn px-6 py-2" onclick="addKeys()">📥 Đẩy key</button><button class="btn-ghost px-6 py-2" onclick="closeModal('keyFormBox')">Hủy</button></div>
+      </div>
+    </div>
+
+    <div id="aUsers" class="atab hidden">
+      <h4 class="display text-2xl font-extrabold mb-2">Yêu cầu cấp lại MK</h4>
+      <div class="overflow-x-auto mb-6"><table class="w-full"><thead><tr><th>Thời gian</th><th>Tài khoản</th><th>Gmail</th><th>MK mới</th></tr></thead><tbody id="adminResets"></tbody></table></div>
+      <h4 class="display text-2xl font-extrabold mb-2">Thành viên <span id="userCount" style="color:var(--mute);font-size:1rem"></span></h4>
+      <div class="overflow-x-auto"><table class="w-full"><thead><tr><th>Tài khoản</th><th>Gmail</th><th>Số dư</th><th>Cộng/trừ</th><th>Xóa</th></tr></thead><tbody id="adminUsers"></tbody></table></div>
+    </div>
+
+    <div id="aOrders" class="atab hidden"><div class="overflow-x-auto"><table class="w-full"><thead><tr><th>Thời gian</th><th>Khách</th><th>Sản phẩm</th><th>Giá</th><th>Key</th></tr></thead><tbody id="adminOrders"></tbody></table></div></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast">
+  <div class="toast-box">
+    <div class="toast-icon" id="toastIcon">✅</div>
+    <div class="toast-content">
+      <div class="toast-title" id="toastTitle">Thành công</div>
+      <div class="toast-msg" id="toastMsg"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== CONFIG ===== */
+const firebaseConfig = {
+  apiKey: "AIzaSyAOcavYOsOGgRnmfPKeojppLoP6hPYe6pI",
+  authDomain: "shopcuttay.firebaseapp.com",
+  databaseURL: "https://shopcuttay-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "shopcuttay",
+  storageBucket: "shopcuttay.firebasestorage.app",
+  messagingSenderId: "275809822981",
+  appId: "1:275809822981:web:02e33ad2515eed78b32f6c"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'CONANMODS';
+
+/* ===== UTILS ===== */
+const $ = id => document.getElementById(id);
+const fmt = n => Number(n || 0).toLocaleString('vi-VN');
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const openModal = id => $(id).classList.add('open');
+const closeModal = id => $(id).classList.remove('open');
+const lines = t => String(t||'').split('\n').map(s=>s.trim()).filter(Boolean);
+async function sha256(s){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,'0')).join('');}
+
+/* ===== TOAST ===== */
+let toastTimer;
+function toast(msg, type='success', title=''){
+  const t=$('toast');
+  const titles={success:'✅ Thành công',error:'❌ Lỗi',warning:'⚠️ Cảnh báo',info:'ℹ️ Thông báo'};
+  const icons={success:'✅',error:'❌',warning:'⚠️',info:'ℹ️'};
+  $('toastIcon').textContent=icons[type]||'✅';
+  $('toastTitle').textContent=title||titles[type]||'Thông báo';
+  $('toastMsg').textContent=msg;
+  t.querySelector('.toast-box').className='toast-box '+type;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer=setTimeout(()=>t.classList.remove('show'),3800);
+}
+
+/* ===== TAB ===== */
+function switchTab(name){
+  document.querySelectorAll('.nav-tab[data-tab]').forEach(t=>t.classList.toggle('active',t.dataset.tab===name));
+  document.querySelectorAll('.tab-content').forEach(c=>c.classList.remove('active'));
+  $('tab-'+name).classList.add('active');
+  document.querySelectorAll('.sidebar-item[data-tab]').forEach(s=>s.classList.toggle('active',s.dataset.tab===name));
+  window.scrollTo({top:250,behavior:'smooth'});
+}
+
+/* ===== SESSION ===== */
+let me=null,meData=null,isAdmin=false,myBalance=0,myRef=null,authMode='login';
+let notiRef=null,depositsRef=null,ordersRef=null;
+
+function openAuth(mode){
+  authMode=mode;const reg=mode==='register';
+  document.querySelectorAll('.regOnly').forEach(e=>e.style.display=reg?'':'none');
+  $('forgotLink').style.display=reg?'none':'';
+  $('aUser').placeholder=reg?'Tên đăng nhập (viết liền)':'Tên đăng nhập hoặc Gmail';
+  $('authTitle').textContent=reg?'Tạo tài khoản':'Đăng nhập';
+  $('authBtn').textContent=reg?'Đăng ký':'Đăng nhập';
+  $('authSwitch').textContent=reg?'Đã có TK? Đăng nhập':'Chưa có TK? Đăng ký';
+  openModal('authModal');
+}
+async function submitAuth(){
+  const id=$('aUser').value.trim().toLowerCase(),pass=$('aPass').value;
+  if(pass.length<6)return toast('MK ≥6 ký tự','warning');
+  const hash=await sha256(pass);
+  try{
+    if(authMode==='register'){
+      const nick=$('aNick').value.trim(),email=$('aEmail').value.trim().toLowerCase();
+      if(nick.length<2)return toast('Tên hiển thị ≥2 ký tự','warning');
+      if(!/^[a-z0-9_]{3,20}$/.test(id))return toast('Tên ĐN 3-20 ký tự a-z 0-9 _','warning');
+      if(id===ADMIN_USER)return toast('Tên này bị giữ','warning');
+      if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return toast('Gmail không hợp lệ','warning');
+      if((await db.ref('users/'+id).once('value')).exists())return toast('Tên đã tồn tại','warning');
+      if((await db.ref('users').orderByChild('email').equalTo(email).once('value')).exists())return toast('Gmail đã dùng','warning');
+      await db.ref('users/'+id).set({username:id,nickname:nick,email,passHash:hash,balance:0,role:'user',createdAt:Date.now()});
+      saveSession(id,hash);startSession(id);toast('Chào mừng '+nick+'!','success','Đăng ký thành công');
+    }else{
+      if(id===ADMIN_USER){
+        if(pass!==ADMIN_PASS)return toast('Sai MK','error');
+        saveSession(ADMIN_USER,hash);startAdminSession();toast('Xin chào Admin','success','Đăng nhập');
+      }else{
+        let uname=id;
+        if(id.includes('@')){
+          const s=await db.ref('users').orderByChild('email').equalTo(id).once('value');
+          uname=null;s.forEach(c=>{uname=c.key;});
+          if(!uname)return toast('Sai thông tin','error');
+        }
+        const snap=await db.ref('users/'+uname).once('value');
+        if(!snap.exists()||snap.val().passHash!==hash)return toast('Sai thông tin','error');
+        saveSession(uname,hash);startSession(uname);toast('Chào '+(snap.val().nickname||uname)+'!','success','Đăng nhập');
+      }
+    }
+    closeModal('authModal');$('aPass').value='';
+  }catch(e){toast(e.message,'error');}
+}
+const saveSession=(u,h)=>localStorage.setItem('vnx_session',JSON.stringify({u,h}));
+
+function startSession(u){
+  if(myRef)myRef.off();
+  me=u;isAdmin=false;
+  myRef=db.ref('users/'+u);
+  myRef.on('value',s=>{
+    if(!s.exists()){logout();return;}
+    meData=s.val();myBalance=meData.balance||0;renderHeader();
+  });
+  if(notiRef)notiRef.off();
+  notiRef=db.ref('notifications/'+u);
+  notiRef.on('value',s=>{renderNotifications(s.val()||{});});
+  loadCart();
+}
+function startAdminSession(){
+  if(myRef){myRef.off();myRef=null;}
+  if(notiRef){notiRef.off();notiRef=null;}
+  me=ADMIN_USER;isAdmin=true;meData={nickname:'ADMIN',username:'admin',email:'admin@system',role:'admin'};myBalance=0;renderHeader();
+}
+function logout(){
+  localStorage.removeItem('vnx_session');
+  if(myRef)myRef.off();if(notiRef)notiRef.off();
+  myRef=notiRef=null;
+  me=meData=null;isAdmin=false;
+  closeModal('adminPanel');closeModal('profileModal');closeModal('cartModal');
+  renderHeader();renderNotifications({});renderCart();
+  toast('Đã đăng xuất','info');
+}
+function renderHeader(){
+  $('userBox').classList.toggle('hidden',!me);$('userBox').classList.toggle('flex',!!me);
+  $('guestBox').classList.toggle('hidden',!!me);
+  $('adminBtn').classList.toggle('hidden',!isAdmin);
+  if(me){
+    $('uName').textContent=meData?.nickname||me;
+    $('uRole').textContent=isAdmin?'[Admin]':'';
+    $('uBal').textContent=isAdmin?'∞':fmt(myBalance);
+    $('uAvatar').textContent=(meData?.nickname||me||'?').charAt(0).toUpperCase();
+  }
+}
+async function restoreSession(){
+  try{
+    const s=JSON.parse(localStorage.getItem('vnx_session')||'null');if(!s)return;
+    if(s.u===ADMIN_USER){if(s.h===await sha256(ADMIN_PASS))startAdminSession();return;}
+    const snap=await db.ref('users/'+s.u).once('value');
+    if(snap.exists()&&snap.val().passHash===s.h)startSession(s.u);
+  }catch(e){}
+}
+async function submitForgot(){
+  const email=$('fEmail').value.trim().toLowerCase();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return toast('Gmail không hợp lệ','warning');
+  const s=await db.ref('users').orderByChild('email').equalTo(email).once('value');
+  if(!s.exists()){$('fResult').innerHTML='<span class="tag-no">Không tìm thấy.</span>';return;}
+  let uname;s.forEach(c=>{uname=c.key;});
+  await db.ref('reset_requests').push({username:uname,email,time:Date.now(),status:'open'});
+  $('fResult').innerHTML='<span class="tag-ok">Đã gửi yêu cầu.</span>';
+  toast('Đã gửi yêu cầu','success');
+}
+
+/* ===== THÔNG BÁO ===== */
+let notiData={};
+function renderNotifications(data){
+  notiData=data;
+  const all=Object.entries(data).sort((a,b)=>(b[1].time||0)-(a[1].time||0));
+  const unread=all.filter(([,n])=>!n.read).length;
+  $('notiBadge').textContent=unread;
+  $('notiBadge').classList.toggle('hidden',unread===0);
+  $('notiList').innerHTML=all.length?all.map(([id,n])=>`
+    <div class="noti-item ${n.read?'':'unread'}" onclick="readNoti('${id}')">
+      <div class="flex gap-2 items-start">
+        <span style="font-size:1.3rem">${n.icon||'📢'}</span>
+        <div class="flex-1">
+          <div class="text-sm font-bold">${esc(n.title||'Thông báo')}</div>
+          <div class="text-xs mt-1" style="color:var(--mute)">${esc(n.body||'')}</div>
+          <div class="text-xs mt-1" style="color:var(--mute);font-size:.7rem">${n.time?new Date(n.time).toLocaleString('vi-VN'):''}</div>
+        </div>
+      </div>
+    </div>`).join(''):'<div class="p-4 text-center text-sm" style="color:var(--mute)">Không có thông báo</div>';
+}
+function toggleNotifications(){$('notiDropdown').classList.toggle('hidden');}
+document.addEventListener('click',e=>{
+  const dd=$('notiDropdown');if(!dd)return;
+  if(!e.target.closest('[onclick*="toggleNotifications"]') && !e.target.closest('#notiDropdown')) dd.classList.add('hidden');
+});
+async function readNoti(id){if(!me)return;await db.ref('notifications/'+me+'/'+id+'/read').set(true);}
+async function markAllRead(){
+  if(!me)return;
+  const upd={};Object.keys(notiData).forEach(id=>upd['notifications/'+me+'/'+id+'/read']=true);
+  await db.ref().update(upd);toast('Đã đánh dấu tất cả','info');
+}
+async function pushNoti(user,title,body,icon){
+  await db.ref('notifications/'+user).push({title,body,icon:icon||'📢',time:Date.now(),read:false});
+}
+
+/* ===== GIỎ HÀNG ===== */
+let cart=[];
+function loadCart(){try{cart=JSON.parse(localStorage.getItem('vnx_cart_'+me)||'[]');}catch(e){cart=[];}renderCart();}
+function saveCart(){localStorage.setItem('vnx_cart_'+me,JSON.stringify(cart));renderCart();}
+function renderCart(){
+  const total=cart.reduce((s,i)=>s+i.price,0);
+  $('cartBadge').textContent=cart.length;
+  $('cartBadge').classList.toggle('hidden',cart.length===0);
+  if(!cart.length){
+    $('cartList').innerHTML='<div class="p-8 text-center" style="color:var(--mute)">🛒 Giỏ hàng trống</div>';
+    $('cartFooter').classList.add('hidden');
+    return;
+  }
+  $('cartFooter').classList.remove('hidden');
+  $('cartTotal').textContent=fmt(total)+'đ';
+  $('cartList').innerHTML=cart.map((item,i)=>`
+    <div class="flex items-center gap-3 panel p-3 mb-2">
+      <img src="${esc(item.img||'')}" style="width:60px;height:60px;object-fit:cover;background:#040d12" onerror="this.style.display='none'">
+      <div class="flex-1">
+        <b class="display text-lg">${esc(item.name)}</b>
+        <div class="text-sm" style="color:var(--accent)"><b>${fmt(item.price)}đ</b></div>
+      </div>
+      <button class="btn-ghost px-3 py-1" style="color:var(--red);border-color:#ff4d6d55" onclick="removeCart(${i})">🗑️</button>
+    </div>`).join('');
+}
+function addToCart(){
+  if(!me){closeModal('productModal');openAuth('login');return toast('Đăng nhập trước','warning');}
+  if(isAdmin)return toast('Admin không mua được','warning');
+  const p=products[currentPid];if(!p)return;
+  if(stock[currentPid]===0)return toast('Hết key','error');
+  if(cart.find(c=>c.id===currentPid))return toast('SP đã có trong giỏ','warning');
+  cart.push({id:currentPid,name:p.name,price:p.price,img:p.img||''});
+  saveCart();toast('Đã thêm "'+p.name+'" vào giỏ','success');
+  closeModal('productModal');
+}
+function removeCart(i){cart.splice(i,1);saveCart();toast('Đã xóa','info');}
+function openCart(){if(!me)return openAuth('login');openModal('cartModal');renderCart();}
+
+async function checkoutCart(){
+  if(!me)return openAuth('login');
+  if(!cart.length)return toast('Giỏ trống','warning');
+  const total=cart.reduce((s,i)=>s+i.price,0);
+  if(myBalance<total)return toast('Cần '+fmt(total)+'đ, bạn có '+fmt(myBalance)+'đ','error');
+  if(!confirm(`Thanh toán ${cart.length} SP với tổng ${fmt(total)}đ?`))return;
+  const results=[];
+  for(const item of cart){
+    const p=products[item.id];
+    if(!p||stock[item.id]===0){results.push({name:item.name,key:'❌ Hết key'});continue;}
+    try{
+      const pay=await db.ref('users/'+me+'/balance').transaction(b=>(b||0)>=item.price?b-item.price:undefined);
+      if(!pay.committed){results.push({name:item.name,key:'❌ Không đủ tiền'});continue;}
+      let got=null;
+      for(let i=0;i<5&&!got;i++){
+        const first=await db.ref('keys/'+item.id).limitToFirst(1).once('value');
+        if(!first.exists())break;
+        const k=Object.keys(first.val())[0];
+        const r=await db.ref(`keys/${item.id}/${k}`).transaction(cur=>cur?null:undefined);
+        if(r.committed)got=first.val()[k].key;
+      }
+      if(!got){
+        await db.ref('users/'+me+'/balance').transaction(b=>(b||0)+item.price);
+        results.push({name:item.name,key:'❌ Hết key (đã hoàn tiền)'});continue;
+      }
+      await db.ref('orders').push({user:me,productId:item.id,productName:p.name,price:item.price,key:got,time:Date.now()});
+      await pushNoti(me,'Mua hàng thành công','Bạn đã mua "'+p.name+'" với giá '+fmt(item.price)+'đ','🛒');
+      results.push({name:item.name,key:got});
+    }catch(e){results.push({name:item.name,key:'❌ Lỗi: '+e.message});}
+  }
+  cart=[];saveCart();
+  $('keyListVal').innerHTML=results.map(r=>`<div class="mb-2"><b style="color:var(--accent)">${esc(r.name)}</b><br><span class="select-all">${esc(r.key)}</span></div>`).join('');
+  closeModal('cartModal');openModal('keyListModal');
+  toast('Thanh toán xong '+results.length+' SP','success');
+}
+function copyKeyList(){navigator.clipboard.writeText($('keyListVal').innerText).then(()=>toast('Đã sao chép tất cả','success'));}
+
+/* ===== PRODUCTS ===== */
+let products={},stock={};
+db.ref('products').on('value',s=>{products=s.val()||{};renderProducts();renderAdminProducts();fillKeySelect();});
+db.ref('keys').on('value',s=>{
+  stock={};let total=0;
+  s.forEach(c=>{stock[c.key]=c.numChildren();total+=c.numChildren();});
+  $('statKeys').textContent=total;renderProducts();renderAdminProducts();fillKeySelect();
+});
+function renderProducts(){
+  const search=($('searchBox')?.value||'').toLowerCase();
+  const ftype=$('filterType')?.value||'';
+  const fsort=$('filterSort')?.value||'new';
+  let ids=Object.keys(products);
+  if(search)ids=ids.filter(id=>products[id].name.toLowerCase().includes(search));
+  if(ftype)ids=ids.filter(id=>products[id].type===ftype);
+  if(fsort==='priceUp')ids.sort((a,b)=>products[a].price-products[b].price);
+  else if(fsort==='priceDown')ids.sort((a,b)=>products[b].price-products[a].price);
+  else ids.sort((a,b)=>(products[b].time||0)-(products[a].time||0));
+  $('statProducts').textContent=Object.keys(products).length;
+  if(!ids.length){$('productGrid').innerHTML='<div style="color:var(--mute)">Không có sản phẩm.</div>';return;}
+  $('productGrid').innerHTML=ids.map(id=>{
+    const p=products[id],n=stock[id]||0,maint=p.status==='maintenance',out=n===0;
+    const partner=p.partner?`<div class="mt-1"><span class="partner-tag">🤝 ${esc(p.partner)}</span></div>`:'';
+    const isAcc=p.type==='Acc Clone FF LV5';
+    const infoTag=isAcc?'<span class="clone-tag">🎮 Acc Clone FF LV5</span>':'<span class="clone-tag">🔑 Key</span>';
+    return `<article class="card panel p-4 flex flex-col" onclick="openProduct('${id}')">
+      <img src="${esc(p.img)}" alt="${esc(p.name)}" class="w-full h-40 object-cover mb-3" style="background:#040d12"
+           onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22200%22><rect width=%22400%22 height=%22200%22 fill=%22%23040d12%22/><text x=%2250%25%22 y=%2250%25%22 fill=%22%2312303a%22 font-size=%2236%22 text-anchor=%22middle%22>CONAN VNX</text></svg>'">
+      <div class="flex justify-between items-start gap-2">
+        <h3 class="display text-2xl font-extrabold leading-tight">${esc(p.name)}</h3>
+        <span class="border px-2 py-0.5 text-xs whitespace-nowrap ${maint?'tag-bad':'tag-ok'}">${maint?'Bảo trì':'Undetected'}</span>
+      </div>
+      <p class="text-xs mt-1" style="color:var(--green)">${esc(p.type||'Tool')} · còn ${n} key</p>
+      <div class="mt-1">${infoTag}</div>
+      ${partner}
+      <p class="text-sm mt-2 flex-1" style="color:var(--mute)">${esc((p.desc||'').slice(0,80))}...</p>
+      <div class="flex items-center justify-between mt-4">
+        <b class="display text-3xl" style="color:var(--accent)">${fmt(p.price)}đ</b>
+        <button class="btn px-6 py-2" ${maint||out?'disabled':''}>${maint?'Bảo trì':out?'Hết key':'Mua ngay'}</button>
+      </div></article>`;
+  }).join('');
+}
+
+/* ===== PRODUCT DETAIL ===== */
+let currentPid=null;
+function openProduct(pid){
+  const p=products[pid];if(!p)return;
+  currentPid=pid;
+  const n=stock[pid]||0,maint=p.status==='maintenance',out=n===0;
+  $('pmName').textContent=p.name;
+  $('pmDesc').textContent=p.desc||'(Chưa có mô tả)';
+  $('pmImg').src=p.img||'';
+  $('pmImg').onerror=function(){this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22400%22><rect width=%22400%22 height=%22400%22 fill=%22%23040d12%22/><text x=%2250%25%22 y=%2250%25%22 fill=%22%2312303a%22 font-size=%2236%22 text-anchor=%22middle%22>CONAN VNX</text></svg>';};
+  $('pmStatus').textContent=maint?'Bảo trì':'Undetected';
+  $('pmStatus').className='chip '+(maint?'chip-red':'chip-green');
+  $('pmType').textContent=p.type||'Tool';
+  $('pmType').className='chip';
+  $('pmStock').textContent=`Còn ${n} key`;
+  $('pmStock').className='chip '+(n>0?'chip-green':'chip-red');
+  $('pmPrice').textContent=fmt(p.price)+'đ';
+  $('pmPartner').innerHTML=p.partner?`<span class="partner-tag">🤝 Hợp tác với: ${esc(p.partner)}</span>`:'';
+  const isAcc=p.type==='Acc Clone FF LV5';
+  $('pmInfo').innerHTML=p.info?`<div class="panel p-2"><span class="lbl">${isAcc?'🎮 Thông tin tài khoản':'📝 Thông tin TK/MK + Key'}</span><div class="text-xs" style="color:var(--green);white-space:pre-wrap">${esc(p.info)}</div></div>`:'';
+  $('pmBalance').textContent=isAdmin?'∞':fmt(myBalance)+'đ';
+  const btn=$('pmBuyBtn'),btnCart=$('pmCartBtn');
+  if(isAdmin){btn.textContent='⚠️ Admin';btn.disabled=true;btnCart.disabled=true;}
+  else if(maint){btn.textContent='🔧 Bảo trì';btn.disabled=true;btnCart.disabled=true;}
+  else if(out){btn.textContent='❌ Hết key';btn.disabled=true;btnCart.disabled=true;}
+  else if(!me){btn.textContent='🔑 Đăng nhập';btn.disabled=false;btnCart.disabled=false;}
+  else if(myBalance<p.price){btn.textContent='💳 Nạp thêm';btn.disabled=false;btnCart.disabled=false;}
+  else{btn.textContent='⚡ Mua ngay';btn.disabled=false;btnCart.disabled=false;}
+  openModal('productModal');
+}
+async function confirmBuy(){
+  if(!me){closeModal('productModal');openAuth('login');return toast('Đăng nhập','warning');}
+  if(isAdmin)return toast('Admin không mua','warning');
+  const p=products[currentPid];if(!p)return;
+  if(myBalance<p.price){closeModal('productModal');switchTab('deposit');return toast('Nạp tiền để mua','warning');}
+  if(!confirm(`Mua "${p.name}" giá ${fmt(p.price)}đ?`))return;
+  closeModal('productModal');
+  await doBuy(currentPid,p);
+}
+let buying=false;
+async function doBuy(pid,p){
+  if(buying)return;buying=true;
+  try{
+    const pay=await db.ref('users/'+me+'/balance').transaction(b=>(b||0)>=p.price?b-p.price:undefined);
+    if(!pay.committed)return toast('Số dư không đủ','error');
+    let got=null;
+    for(let i=0;i<5&&!got;i++){
+      const first=await db.ref('keys/'+pid).limitToFirst(1).once('value');
+      if(!first.exists())break;
+      const k=Object.keys(first.val())[0];
+      const r=await db.ref(`keys/${pid}/${k}`).transaction(cur=>cur?null:undefined);
+      if(r.committed)got=first.val()[k].key;
+    }
+    if(!got){
+      await db.ref('users/'+me+'/balance').transaction(b=>(b||0)+p.price);
+      return toast('Hết key, đã hoàn tiền','error');
+    }
+    await db.ref('orders').push({user:me,productId:pid,productName:p.name,price:p.price,key:got,time:Date.now()});
+    await pushNoti(me,'Mua hàng thành công','Bạn đã mua "'+p.name+'" với giá '+fmt(p.price)+'đ','🛒');
+    $('keyProd').textContent=p.name;$('keyVal').textContent=got;openModal('keyModal');
+    toast('Mua thành công!','success');
+  }catch(e){toast('Lỗi: '+e.message,'error');}
+  finally{buying=false;}
+}
+function copyKey(){navigator.clipboard.writeText($('keyVal').textContent).then(()=>toast('Đã sao chép key','success'));}
+
+/* ===== NẠP THẺ ===== */
+let pickedTelco='',pickedAmount=0;
+function pickTelco(el){document.querySelectorAll('[data-telco]').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');pickedTelco=el.dataset.telco;}
+function pickAmount(el){document.querySelectorAll('[data-amount]').forEach(x=>x.classList.remove('selected'));el.classList.add('selected');pickedAmount=Number(el.dataset.amount);}
+async function submitDeposit(){
+  if(!me)return toast('Đăng nhập trước','warning');
+  if(isAdmin)return toast('Admin không cần nạp','warning');
+  if(!pickedTelco)return toast('Chọn nhà mạng','warning');
+  if(!pickedAmount)return toast('Chọn mệnh giá','warning');
+  const seri=$('dSeri').value.trim(),pin=$('dPin').value.trim();
+  if(!seri||!pin)return toast('Nhập seri và PIN','warning');
+  await db.ref('deposits').push({user:me,telco:pickedTelco,amount:pickedAmount,seri,pin,status:'pending',time:Date.now()});
+  $('dSeri').value='';$('dPin').value='';
+  document.querySelectorAll('[data-telco],[data-amount]').forEach(x=>x.classList.remove('selected'));
+  pickedTelco='';pickedAmount=0;
+  toast('Đã gửi! Chờ Admin duyệt 1-5 phút','success','Gửi thẻ thành công');
+}
+
+/* ===== PROFILE ===== */
+function openProfile(){
+  if(!me)return toast('Đăng nhập trước','warning');
+  if(isAdmin){
+    $('pfUsername').textContent='admin';$('pfNick').textContent='ADMIN';$('pfEmail').textContent='admin@system';
+    $('pfBalance').textContent='∞';$('pfCreated').textContent='-';$('pfRole').textContent='Quản trị viên';
+  }else{
+    const u=meData||{};
+    $('pfUsername').textContent=u.username||me;
+    $('pfNick').textContent=u.nickname||'-';
+    $('pfEmail').textContent=u.email||'-';
+    $('pfBalance').textContent=fmt(u.balance||0)+'đ';
+    $('pfCreated').textContent=u.createdAt?new Date(u.createdAt).toLocaleString('vi-VN'):'-';
+    $('pfRole').textContent=u.role==='admin'?'Admin':'Thành viên';
+  }
+  switchProfileTab('pass');openModal('profileModal');
+}
+function switchProfileTab(t){
+  ['pass','deposits','orders'].forEach(x=>{
+    $('pfTab-'+x).classList.toggle('active',x===t);
+    $('pfBody-'+x).classList.toggle('hidden',x!==t);
+  });
+  if(t==='deposits')renderPfDeposits();
+  if(t==='orders')renderPfOrders();
+}
+function renderPfDeposits(){
+  if(isAdmin){$('pfDepositList').innerHTML='<tr><td colspan="4" style="color:var(--mute);text-align:center;padding:1rem">Admin không có.</td></tr>';return;}
+  if(depositsRef)depositsRef.off();
+  // TẢI TẤT CẢ rồi filter JS — tránh cần Firebase index
+  depositsRef=db.ref('deposits');
+  depositsRef.on('value',s=>{
+    const rows=[];
+    s.forEach(c=>{const d=c.val()||{};if(d.user===me)rows.push(d);});
+    rows.sort((a,b)=>b.time-a.time);
+    if(!rows.length){$('pfDepositList').innerHTML='<tr><td colspan="4" style="color:var(--mute);text-align:center;padding:1rem">Chưa có lịch sử nạp.</td></tr>';return;}
+    const m={pending:['Chờ duyệt','tag-bad'],approved:['Đã duyệt','tag-ok'],rejected:['Từ chối','tag-no']};
+    $('pfDepositList').innerHTML=rows.map(d=>{
+      const st=m[d.status]||m.pending;
+      return `<tr><td>${new Date(d.time).toLocaleString('vi-VN')}</td><td>${esc(d.telco)}</td><td><b style="color:var(--gold)">${fmt(d.amount)}đ</b></td><td><span class="chip ${st[1]}">${st[0]}</span></td></tr>`;
+    }).join('');
+  });
+}
+let myOrdersCache=[];
+function renderPfOrders(){
+  if(isAdmin){$('pfOrderList').innerHTML='<div style="color:var(--mute);text-align:center;padding:1rem">Admin không có.</div>';return;}
+  if(ordersRef)ordersRef.off();
+  // TẢI TẤT CẢ rồi filter JS
+  ordersRef=db.ref('orders');
+  ordersRef.on('value',s=>{
+    const rows=[];
+    s.forEach(c=>{const o=c.val()||{};if(o.user===me)rows.push(o);});
+    rows.sort((a,b)=>b.time-a.time);
+    myOrdersCache=rows;
+    if(!rows.length){$('pfOrderList').innerHTML='<div style="color:var(--mute);text-align:center;padding:1rem">Chưa mua gì.</div>';return;}
+    $('pfOrderList').innerHTML=rows.map(o=>`
+      <div class="history-item">
+        <div class="flex justify-between items-start gap-2 flex-wrap">
+          <div>
+            <b class="display text-lg" style="color:var(--accent)">${esc(o.productName)}</b>
+            <div class="text-xs" style="color:var(--mute)">${new Date(o.time).toLocaleString('vi-VN')}</div>
+          </div>
+          <b style="color:var(--gold)">${fmt(o.price)}đ</b>
+        </div>
+        <div class="mt-2 p-2 panel select-all font-bold text-sm" style="color:var(--green);word-break:break-all">${esc(o.key)}</div>
+        <button class="btn-ghost px-3 py-1 mt-2 text-xs" onclick="copyOneKey('${esc(o.key)}')">📋 Sao chép key này</button>
+      </div>`).join('');
+  });
+}
+function copyOneKey(k){navigator.clipboard.writeText(k).then(()=>toast('Đã sao chép key','success'));}
+function copyAllOrders(){
+  if(!myOrdersCache.length)return toast('Chưa có đơn nào','warning');
+  const text=myOrdersCache.map(o=>`[${new Date(o.time).toLocaleString('vi-VN')}] ${o.productName} - ${fmt(o.price)}đ\nKEY: ${o.key}`).join('\n\n');
+  navigator.clipboard.writeText(text).then(()=>toast('Đã sao chép '+myOrdersCache.length+' đơn','success'));
+}
+async function changePassword(){
+  if(isAdmin)return toast('Admin đổi MK trong code','warning');
+  const oldP=$('pfOldPass').value,np=$('pfNewPass').value,np2=$('pfNewPass2').value;
+  if(!oldP)return toast('Nhập MK hiện tại','warning');
+  if(np.length<6)return toast('MK mới ≥6 ký tự','warning');
+  if(np!==np2)return toast('MK xác nhận không khớp','error');
+  const oldHash=await sha256(oldP);
+  if(oldHash!==meData.passHash)return toast('MK hiện tại sai','error');
+  await db.ref('users/'+me+'/passHash').set(await sha256(np));
+  const newHash=await sha256(np);saveSession(me,newHash);
+  $('pfOldPass').value='';$('pfNewPass').value='';$('pfNewPass2').value='';
+  toast('Đổi MK thành công!','success');
+}
+
+/* ===== ADMIN ===== */
+let deposits={},adminWatching=false;
+function openAdmin(){if(!isAdmin)return;openModal('adminPanel');watchAdminData();}
+document.getElementById('adminTabs').addEventListener('click',e=>{
+  const b=e.target.closest('button[data-tab]');if(!b)return;
+  document.querySelectorAll('.atab').forEach(x=>x.classList.add('hidden'));$(b.dataset.tab).classList.remove('hidden');
+  document.querySelectorAll('#adminTabs button').forEach(x=>x.className=(x===b?'btn':'btn-ghost')+' px-5 py-2');
+  if(b.dataset.tab==='aProducts')renderAdminProducts();
+});
+function watchAdminData(){
+  if(adminWatching)return;adminWatching=true;
+  db.ref('deposits').on('value',s=>{deposits=s.val()||{};renderDeposits();});
+  db.ref('users').on('value',s=>{
+    const rows=[];s.forEach(c=>{
+      const u=c.val()||{};
+      rows.push({key:c.key,username:u.username||c.key,nickname:u.nickname||'(chưa đặt)',email:u.email||'(chưa có)',balance:Number(u.balance)||0});
+    });
+    rows.sort((a,b)=>a.username.localeCompare(b.username));
+    $('userCount').textContent=rows.length?`(${rows.length})`:'';
+    if(!rows.length){$('adminUsers').innerHTML='<tr><td colspan="5" style="color:var(--mute);text-align:center;padding:1rem">Chưa có TV.</td></tr>';return;}
+    $('adminUsers').innerHTML=rows.map(u=>`
+      <tr>
+        <td><b>${esc(u.username)}</b><br><span style="color:var(--mute);font-size:.8rem">${esc(u.nickname)}</span></td>
+        <td>${esc(u.email)}</td>
+        <td><b style="color:var(--green)">${fmt(u.balance)}đ</b></td>
+        <td class="whitespace-nowrap">
+          <input id="amt_${esc(u.key)}" type="number" class="inp" style="width:100px;display:inline-block" placeholder="Số tiền">
+          <button class="btn px-3 py-1 ml-1" onclick="adjustBalance('${esc(u.key)}',1)">+</button>
+          <button class="btn-ghost px-3 py-1" onclick="adjustBalance('${esc(u.key)}',-1)">−</button>
+        </td>
+        <td><button class="btn-ghost px-3 py-1" style="color:var(--red);border-color:#ff4d6d55" onclick="deleteUser('${esc(u.key)}')">🗑️</button></td>
+      </tr>`).join('');
+  });
+  db.ref('reset_requests').on('value',s=>{
+    const rows=[];s.forEach(c=>{if(c.val()?.status==='open')rows.push([c.key,c.val()]);});
+    if(!rows.length){$('adminResets').innerHTML='<tr><td colspan="4" style="color:var(--mute);text-align:center;padding:.75rem">Không có.</td></tr>';return;}
+    $('adminResets').innerHTML=rows.map(([id,r])=>`<tr><td>${new Date(r.time).toLocaleString('vi-VN')}</td><td>${esc(r.username)}</td><td>${esc(r.email)}</td>
+      <td class="whitespace-nowrap"><input id="np_${id}" class="inp" style="width:150px;display:inline-block" placeholder="MK mới">
+      <button class="btn px-3 py-1 ml-1" onclick="resetPassword('${id}','${esc(r.username)}')">Cấp lại</button></td></tr>`).join('');
+  });
+  db.ref('orders').limitToLast(300).on('value',s=>{
+    const rows=[];s.forEach(c=>rows.push(c.val()));rows.reverse();
+    $('adminOrders').innerHTML=rows.map(o=>`<tr><td>${new Date(o.time).toLocaleString('vi-VN')}</td><td>${esc(o.user)}</td>
+      <td>${esc(o.productName)}</td><td>${fmt(o.price)}đ</td><td class="select-all">${esc(o.key)}</td></tr>`).join('')
+      ||'<tr><td colspan="5" style="color:var(--mute);text-align:center;padding:.75rem">Chưa có.</td></tr>';
+  });
+}
+function renderDeposits(){
+  const all=Object.entries(deposits).sort((a,b)=>b[1].time-a[1].time);
+  const open=all.filter(([,d])=>d.status==='pending').length;
+  $('depCount').textContent=open?`(${open})`:'';
+  const pend=all.filter(([,d])=>d.status==='pending');
+  if(!pend.length){$('depositList').innerHTML='<tr><td colspan="7" style="color:var(--mute);text-align:center;padding:1rem">Không có yêu cầu chờ.</td></tr>';return;}
+  $('depositList').innerHTML=pend.map(([id,d])=>`
+    <tr>
+      <td>${new Date(d.time).toLocaleString('vi-VN')}</td>
+      <td><b>${esc(d.user)}</b></td>
+      <td><span class="chip">${esc(d.telco)}</span></td>
+      <td><b style="color:var(--gold)">${fmt(d.amount)}đ</b></td>
+      <td class="select-all">${esc(d.seri)}</td>
+      <td class="select-all">${esc(d.pin)}</td>
+      <td class="whitespace-nowrap">
+        <button class="btn px-3 py-1" onclick="approveDeposit('${id}')">✅</button>
+        <button class="btn-ghost px-3 py-1 ml-1" onclick="rejectDeposit('${id}')">❌</button>
+      </td>
+    </tr>`).join('');
+}
+async function approveDeposit(id){
+  const d=deposits[id];if(!d||d.status!=='pending')return;
+  if(!confirm(`Duyệt nạp ${fmt(d.amount)}đ cho ${d.user}?`))return;
+  await db.ref('users/'+d.user+'/balance').transaction(b=>(b||0)+d.amount);
+  await db.ref('deposits/'+id).update({status:'approved',approvedAt:Date.now()});
+  await pushNoti(d.user,'Nạp tiền được duyệt','Admin đã cộng '+fmt(d.amount)+'đ vào ví.','💰');
+  toast('Đã cộng '+fmt(d.amount)+'đ','success');
+}
+async function rejectDeposit(id){
+  const d=deposits[id];if(!d)return;
+  if(!confirm('Từ chối yêu cầu nạp này?'))return;
+  await db.ref('deposits/'+id).update({status:'rejected',rejectedAt:Date.now()});
+  await pushNoti(d.user,'Nạp tiền bị từ chối','Yêu cầu nạp '+fmt(d.amount)+'đ đã bị từ chối.','⚠️');
+  toast('Đã từ chối','info');
+}
+function renderAdminProducts(){
+  const search=($('adminSearch')?.value||'').toLowerCase();
+  let ids=Object.keys(products);
+  if(search)ids=ids.filter(id=>products[id].name.toLowerCase().includes(search));
+  ids.sort((a,b)=>(products[b].time||0)-(products[a].time||0));
+  if(!ids.length){$('adminProducts').innerHTML='<tr><td colspan="8" style="color:var(--mute);text-align:center;padding:1rem">Chưa có SP.</td></tr>';return;}
+  $('adminProducts').innerHTML=ids.map(id=>{
+    const p=products[id],n=stock[id]||0;
+    const stColor=p.status==='maintenance'?'tag-bad':'tag-ok';
+    const stText=p.status==='maintenance'?'Bảo trì':'Undetected';
+    const img=p.img?`<img src="${esc(p.img)}" style="width:50px;height:50px;object-fit:cover" onerror="this.style.display='none'">`:'—';
+    const partner=p.partner?`<span class="partner-tag">${esc(p.partner)}</span>`:'—';
+    const isAcc=p.type==='Acc Clone FF LV5';
+    const typeTag=isAcc?'<span class="clone-tag">🎮 Acc</span>':'<span class="clone-tag">🔑 Key</span>';
+    return `<tr>
+      <td>${img}</td>
+      <td><b>${esc(p.name)}</b><br><span style="color:var(--mute);font-size:.75rem">${esc((p.desc||'').slice(0,50))}</span></td>
+      <td>${esc(p.type)}</td>
+      <td><b style="color:var(--accent)">${fmt(p.price)}đ</b></td>
+      <td><span class="chip ${stColor}">${stText}</span></td>
+      <td>${partner}</td>
+      <td>${typeTag}<br><b style="color:${n>0?'#00ff9d':'#ff4d6d'}">${n}</b></td>
+      <td class="whitespace-nowrap">
+        <button class="btn px-3 py-1" onclick="showProductForm('${id}')">✏️</button>
+        <button class="btn-ghost px-3 py-1 ml-1" onclick="showKeyFormFor('${id}')">🔑</button>
+        <button class="btn-ghost px-3 py-1 ml-1" style="color:var(--red);border-color:#ff4d6d55" onclick="deleteProduct('${id}')">🗑️</button>
+      </td></tr>`;
+  }).join('');
+}
+function updateFormLabels(){
+  const t=$('pType').value;
+  const isAcc=t==='Acc Clone FF LV5';
+  $('pInfoLabel').textContent=isAcc?'🎮 Thông tin tài khoản (TK/MK)':'📝 Thông tin TK/MK + Key';
+  $('pInfo').placeholder=isAcc?'VD:\nTK: accclone01\nMK: pass123':"VD:\nTK: user123\nMK: pass456\nKEY: ABC-123";
+}
+function showProductForm(id){
+  if(id){
+    const p=products[id];
+    $('pId').value=id;$('pName').value=p.name;$('pImg').value=p.img||'';$('pPrice').value=p.price;
+    $('pType').value=p.type||'Tool PC';$('pStatus').value=p.status||'undetected';$('pDesc').value=p.desc||'';
+    $('pPartner').value=p.partner||'';$('pInfo').value=p.info||'';
+    $('pFormTitle').textContent='✏️ Sửa: '+p.name;
+  }else{
+    ['pId','pName','pImg','pPrice','pDesc','pPartner','pInfo'].forEach(i=>$(i).value='');
+    $('pType').value='Tool PC';
+    $('pFormTitle').textContent='➕ Thêm SP';
+  }
+  updateFormLabels();
+  openModal('productFormBox');
+}
+function showKeyForm(){fillKeySelect();openModal('keyFormBox');}
+function showKeyFormFor(pid){fillKeySelect();$('kProd').value=pid;openModal('keyFormBox');}
+function fillKeySelect(){
+  const cur=$('kProd').value;
+  const opts=Object.entries(products).map(([id,p])=>`<option value="${id}">${esc(p.name)} (${stock[id]||0} key)</option>`).join('');
+  $('kProd').innerHTML=opts||'<option value="">— Chưa có SP —</option>';
+  if(cur)$('kProd').value=cur;
+}
+async function saveProduct(){
+  const data={name:$('pName').value.trim(),img:$('pImg').value.trim(),price:Number($('pPrice').value),
+              type:$('pType').value,status:$('pStatus').value,desc:$('pDesc').value.trim(),
+              partner:$('pPartner').value.trim(),info:$('pInfo').value.trim(),time:Date.now()};
+  if(!data.name||$('pPrice').value===''||!(data.price>=0))return toast('Nhập tên và giá','warning');
+  const id=$('pId').value;
+  if(id){
+    const upd={name:data.name,img:data.img,price:data.price,type:data.type,status:data.status,desc:data.desc,partner:data.partner,info:data.info};
+    await db.ref('products/'+id).update(upd);
+    toast('Đã cập nhật SP','success');
+  }else{
+    await db.ref('products').push(data);
+    const usersSnap=await db.ref('users').once('value');
+    const upd={};
+    usersSnap.forEach(c=>{
+      const uid=c.key;
+      const nk=db.ref('notifications/'+uid).push().key;
+      upd[`notifications/${uid}/${nk}`]={title:'Sản phẩm mới!',body:'Vừa có "'+data.name+'" giá '+fmt(data.price)+'đ. Mua ngay!',icon:'🆕',time:Date.now(),read:false};
+    });
+    if(Object.keys(upd).length)await db.ref().update(upd);
+    toast('Đã thêm SP + thông báo','success');
+  }
+  closeModal('productFormBox');
+}
+async function deleteProduct(id){
+  if(!confirm('Xóa SP này? Kho key cũng bị xóa.'))return;
+  await db.ref('products/'+id).remove();await db.ref('keys/'+id).remove();toast('Đã xóa SP','success');
+}
+async function addKeys(){
+  const pid=$('kProd').value,list=lines($('kList').value);
+  if(!pid||!list.length)return toast('Chọn SP và nhập key','warning');
+  const upd={};list.forEach(k=>upd[db.ref('keys/'+pid).push().key]={key:k});
+  await db.ref('keys/'+pid).update(upd);
+  $('kList').value='';toast('Đã thêm '+list.length+' key','success');
+}
+async function adjustBalance(u,sign){
+  const v=Number($('amt_'+u).value);
+  if(!(v>0))return toast('Nhập số tiền > 0','warning');
+  await db.ref(`users/${u}/balance`).transaction(b=>Math.max(0,(b||0)+sign*v));
+  $('amt_'+u).value='';toast('Đã '+(sign>0?'cộng':'trừ')+' '+fmt(v)+'đ','success');
+  if(sign>0)await pushNoti(u,'Số dư được cộng','Admin đã cộng '+fmt(v)+'đ vào ví.','💰');
+}
+async function deleteUser(u){
+  if(!confirm(`⚠️ XÓA TK "${u}"? Không hoàn tác!`))return;
+  if(!confirm(`Xác nhận LẦN CUỐI?`))return;
+  try{await db.ref('users/'+u).remove();toast('Đã xóa '+u,'success');}
+  catch(e){toast(e.message,'error');}
+}
+async function resetPassword(id,u){
+  const np=$('np_'+id).value;
+  if(np.length<6)return toast('MK ≥6 ký tự','warning');
+  await db.ref(`users/${u}/passHash`).set(await sha256(np));
+  await db.ref('reset_requests/'+id+'/status').set('done');
+  toast('Đã cấp lại MK cho '+u,'success');
+}
+
+/* ===== KHỞI ĐỘNG ===== */
+openAuth('login');closeModal('authModal');
+renderHeader();
+restoreSession();
+</script>
+</body>
+</html>
